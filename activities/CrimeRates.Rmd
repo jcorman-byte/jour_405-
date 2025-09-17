@@ -23,12 +23,12 @@ crimes <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads
 
 ### Task 3: Use janitor to clean up the column names
 
-
+Done in task #2
 
 ### Task 4: Calculate the total crime rate for each year (picking our unit!)
 
 ```{r}
-crimes |> mutate(total_rate = grand_total/population * 10000)
+crimes <- crimes|> mutate(total_rate = grand_total/population * 10000)
 ```
 
 
@@ -45,7 +45,7 @@ crimes_with_rates <- crimes |> mutate(violent_rate = violent_crime_total/populat
 
 Write a few sentences about what you found in the data. What years had the highest crime rates? What years had the lowest crime rates? Does the pattern match your expectations?
 
-
+1980,1981, and 1979 had the highest crime rates. 2020, 2019, and 2018 had the lowest crime rates. I feel this pattern does match my expectations because security has definitely tightened up on campus over the years to protect students safety. In the early 80's there wasn't as much protection towards students and buildings on campus. Furthermore, during the years where there was the lowest crime rate, the covid pandemic was in full effect keeping people inside. This makes a lot of sense why crime would be lower then other years.
 
 
 When you are done, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
