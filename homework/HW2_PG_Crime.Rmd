@@ -71,7 +71,7 @@ Write up a lede and nutgraf of a story focused on the crime data in Prince Georg
 
 Lede: Theft from vehicles and auto theft were the most frequently reported crimes in Prince George’s County in 2024, averaging more than 300 incidents each month.
 
-Nutgraf:County statistics say property crime far exceeds violent crimes such as homicide or assault, which are few and far between. Somewhat fortunate in the threats of violent crime, residents face everyday thefts and auto-related incidents that impact a large number of people. The dataset also featured categories such as accident and impound, raising curiosity about how these events fit into crime reporting. These trends give some context for residents and policymakers as they consider public safety concerns.
+Nutgraf:County statistics say property crime far exceeds violent crimes such as homicide or assault, which are few and far asbetween. Somewhat fortunate in the threats of violent crime, residents face everyday thefts and auto-related incidents that impact a large number of people. The dataset also featured categories such as accident and impound, raising curiosity about how these events fit into crime reporting. These trends give some context for residents and policymakers as they consider public safety concerns.
 
 ### Task 9: Save Your Work and Put it on GitHub
 
