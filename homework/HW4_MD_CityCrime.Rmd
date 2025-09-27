@@ -77,3 +77,24 @@ The year 2020 saw an extension of the trend of crime in Baltimore, which puts in
 ### Task 9: Save Your Work and Put it on GitHub
 
 Save this notebook, then commit it to your local repository. Push the changes to your GitHub repository and submit the URL for this file in ELMS.
+
+
+### Task 10: Your task will be to take the violent crime rates for 2020 and do three things:
+
+
+```{r}
+md_cities_percentiles <- md_cities_rates 
+  mutate(percentile_2020 = ntile(violent_rate_2020, 100))
+cities_above_90th <- md_cities_percentiles %>%
+  filter(percentile_2020 > 90) %>%
+  nrow()
+
+cities_above_90th
+
+# Part 2:
+
+iqr_violent_2020 <- md_cities_rates %>%
+  summarize(iqr_val = IQR(violent_rate_2020, na.rm = TRUE))
+
+iqr_violent_2020
+```
