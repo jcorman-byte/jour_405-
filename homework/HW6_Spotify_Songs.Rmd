@@ -7,11 +7,13 @@ In this assignment, you will be working with a dataset of songs played on Spotif
 ### Task 1: Load the tidyverse
 
 ```{r}
+library(tidyverse)
 ```
 
 ### Task 2: Load the Spotify Songs dataset from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/spotify_2020.csv
 
 ```{r}
+spot_songs <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/spotify_2020.csv")
 ```
 
 ### Task 3: Calculate the mean and standard deviation of the danceability scores
@@ -19,6 +21,11 @@ In this assignment, you will be working with a dataset of songs played on Spotif
 Write code to calculate the mean and standard deviation of the danceability scores in the Spotify dataset. Display those.
 
 ```{r}
+dance_stats <- spot_songs %>%
+  summarise(
+    mean_danceability = mean(danceability, na.rm = TRUE),
+    sd_danceability = sd(danceability, na.rm = TRUE)
+  )
 ```
 
 ### Task 4: Create a histogram of the danceability scores
@@ -26,6 +33,14 @@ Write code to calculate the mean and standard deviation of the danceability scor
 Write code to create a histogram of the danceability scores in the Spotify dataset, based on the example we did in class.
 
 ```{r}
+ggplot(spot_songs, aes(x = danceability)) +
+  geom_histogram(binwidth = 0.05, fill = "skyblue", color = "black") +
+  labs(
+    title = "Histogram of Danceability Scores",
+    x = "Danceability",
+    y = "Count"
+  ) +
+  theme_minimal()
 ```
 
 ### Task 5: Add a line to the histogram for the mean danceability score
@@ -33,6 +48,19 @@ Write code to create a histogram of the danceability scores in the Spotify datas
 Take the same code and add a vertical line to the histogram for the mean danceability score, based on the example in class.
 
 ```{r}
+mean_danceability <- mean(spot_songs$danceability, na.rm = TRUE)
+sd_danceability <- sd(spot_songs$danceability, na.rm = TRUE)
+
+
+ggplot(spot_songs, aes(x = danceability)) +
+  geom_histogram(binwidth = 0.05, fill = "skyblue", color = "black") +
+  geom_vline(xintercept = mean_danceability, color = "red", linetype = "dashed", linewidth = 1) +
+  labs(
+    title = "Histogram of Danceability Scores with Mean and ±1 SD",
+    x = "Danceability",
+    y = "Count"
+  ) +
+  theme_minimal()
 ```
 
 
@@ -41,11 +69,30 @@ Take the same code and add a vertical line to the histogram for the mean danceab
 Take the previous code and add two lines to the histogram for the 1st standard deviation below and above the mean score.
 
 ```{r}
+mean_danceability <- mean(spot_songs$danceability, na.rm = TRUE)
+sd_danceability <- sd(spot_songs$danceability, na.rm = TRUE)
+
+
+ggplot(spot_songs, aes(x = danceability)) +
+  geom_histogram(binwidth = 0.05, fill = "skyblue", color = "black") +
+  geom_vline(xintercept = mean_danceability, color = "red", linetype = "dashed", linewidth = 1) +
+  geom_vline(xintercept = mean_danceability - sd_danceability, color = "blue", linetype = "dotted", linewidth = 1) +
+  geom_vline(xintercept = mean_danceability + sd_danceability, color = "blue", linetype = "dotted", linewidth = 1) +
+  labs(
+    title = "Histogram of Danceability Scores with Mean and ±1 SD",
+    x = "Danceability",
+    y = "Count"
+  ) +
+  theme_minimal()
 ```
 
 ### Task 7: Describe our results and pitch a story
 
-Write a few sentences about the distribution of danceability scores in the Spotify dataset. Is it a normal distribution, or is it skewed in one direction? What does the mean and one standard distribution tell us about the songs in the dataset? Draft a short story pitch from this data.
+Write a few sentences about the distribution of danceability scores in the Spotify dataset. Is it a normal distribution, or is it skewed in one direction? What does the mean and one standard distribution tell us about the songs in the dataset? Draft a short story pitch from this data. 
+
+The distribution is skewed to the left. This means that most songs score on the higher end of danceability while fewer fall on the lower end. The mean gives us the average danceability across all songs, and one standard deviation above and below the mean shows where the majority of tracks fall. This suggests that Spotify’s 2020 catalog leaned heavily toward music that people could dance to, with fewer low-energy songs.
+
+story pitch: Spotify’s 2020 playlist data reveals that the majority of popular songs were built for dancing. Based on the left-skewed distribution of danceability scores, most of the songs have a upbeat and energetic mood, leaving slower ballads and low-danceability tracks in the minority. One story idea could to explore whether this trend reflects listener demand, industry production choices, or the influence of TikTok and viral dance culture on music that rose to the top.
 
 
 
