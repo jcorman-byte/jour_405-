@@ -1,0 +1,17 @@
+---
+title: "final project"
+author: "Justin Corman" 
+output: html_document
+date: "2025-11-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+billboard <-- read.csv("billboard.csv")
