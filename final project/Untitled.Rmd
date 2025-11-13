@@ -14,4 +14,42 @@ library(tidyverse)
 ```
 
 ```{r}
-billboard <-- read.csv("billboard.csv")
+billboard <- read_csv("billboard_hot_number_ones_database.csv")
+```
+
+```{r}
+music_stats <- billboard %>%
+  summarise(
+    mean_bpm = mean(BPM, na.rm = TRUE),
+    sd_bpm = sd(BPM, na.rm = TRUE),
+    min_bpm = min(BPM, na.rm = TRUE),
+    max_bpm = max(BPM, na.rm = TRUE),
+    median_bpm = median(BPM, na.rm = TRUE)
+  )
+```
+Statistics for Music BPM
+mean:	115.8562
+SD: 24.55999 
+min:16
+max:206
+median:115
+
+--What does it contain and what time period does it cover?
+
+ANSWER HERE: The Billboard Hot 100 Number Ones dataset contains detailed information about every song that has reached the #1 position on the Billboard Hot 100 chart. Each row represents a unique chart-topping song and includes variables such as the title, artist, release year, and BPM just to name a few. The dataset covers hit songs from 1958 through the early 2020s, providing more than sixty years of musical trends and allowing for a comprehensive look at how #1 hits have evolved over time.
+
+--Which columns will be most important for your analysis?
+
+ANSWER HERE:The columns that will matter most for my analysis are those that directly describe the musical qualities of each song, because they help reveal patterns in what makes a song successful. In particular, BPM, Energy, and Danceability are likely to be the key variables, as each one captures an aspect of a song’s sound or structure. The Year column is also important since it allows for comparisons across decades.
+
+--What's missing that you might need or want?
+
+ANSWER HERE: Several valuable pieces of information are missing from the dataset that could help explain why certain songs make it to #1. For example, there is no data on streaming counts, radio airplay, or even TikTok engagement that could show why some are heavily influenced on the modern chart performances. Having these variables would make it easier to understand the cultural forces behind a hit, but they are not included in the dataset, so the analysis must rely only on musical and structural characteristics.
+
+Proposed hypothesis: 
+
+ANSWER HERE: A newsworthy hypothesis emerging from this dataset is that hit songs have become faster over time, which is testable by comparing BPM across decades.
+
+Questions I have: 
+
+ANSWER HERE: Some questions that I still have about the dataset include whether musical characteristics like BPM or Energy truly changed in a meaningful way across decades, or whether the rise of social media has altered what types of songs reach #1. I also want to explore whether shorter songs are becoming more common at the top of the charts and whether certain genres have dominated specific time periods. These questions can guide the next steps of my analysis as I learn to use visualization and statistical tools to confirm or reject potential story ideas within the dataset.
