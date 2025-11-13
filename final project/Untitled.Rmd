@@ -48,7 +48,11 @@ ANSWER HERE: Several valuable pieces of information are missing from the dataset
 
 Proposed hypothesis: 
 
-ANSWER HERE: A newsworthy hypothesis emerging from this dataset is that hit songs have become faster over time, which is testable by comparing BPM across decades.
+Null Hypothesis (Ho):
+The average BPM of #1 songs in the 2010s–2020s is less than or equal to the average BPM of #1 songs from 1970–1999.
+
+Alternative Hypothesis (H1):
+The average BPM of #1 songs in the 2010s–2020s is at least 10 BPM higher than the average BPM of #1 songs from 1970–1999.
 
 Questions I have: 
 
