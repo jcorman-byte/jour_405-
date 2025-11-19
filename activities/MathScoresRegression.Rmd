@@ -1,7 +1,7 @@
 
 ---
 title: "Activity: Linear Regression "
-date: 8-24-2025
+date: 11-17-2025
 ---
 
 ```{r}
@@ -27,7 +27,7 @@ schools <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/ref
 ```
 ### Task: Create a Scatterplot and Describe the Results (2 points)
 
-Next, let's create a scatterplot to visualize the relationship between the FARMS percentage and the percentage of students who met or exceeded math expectations. We'll use ggplot2 to create the plot and add a linear regression line.
+Next, let's create a scatterplot to visualize the relationship between the FARMS  (Free and Reduced-price Meal System) percentage and the percentage of students who met or exceeded math expectations. We'll use ggplot2 to create the plot and add a linear regression line.
 
 ```{r}
 schools |>
@@ -39,7 +39,7 @@ schools |>
 
 The scatterplot shows the overall trend of the relationship between the FARMS percentage and the math test scores. The red line represents the linear regression line, which helps us understand the average relationship between the two variables. Based on what you see here, what's the relationship between FARMS percentage and math test scores?
 
-ANSWER HERE
+The scatterplot suggests a very weak positive relationship between FARMS percentage and the percentage of students meeting or exceeding math expectations. The regression line slopes slightly upward, meaning that—on average—schools with higher FARMS percentages actually show slightly higher math scores. However, the relationship is not strong. The points are widely scattered, showing a lot of variation.
 
 
 ### Task: Linear Regression Model (3 points)
@@ -58,7 +58,11 @@ In the middle, you can see the (Intercept) is 59.57897 and the FARMS coefficient
 
 Based on what you've learned so far, is this model worth using? What does it tell us about the nature of the relationship between FARMS percentage and math scores?
 
-ANSWER HERE
+**WRITE ANSWER HERE**
+
+This model is not very useful. The p-value for FARMS percentage is 0.123, which means the relationship is not statistically significant. In other words, we can’t confidently say that FARMS percentage predicts math scores based on this model. The Adjusted R-squared is 0.025, meaning the model explains only about 2.5% of the differences in math scores across schools. That’s extremely low almost all of the variation in math performance is driven by factors other than FARMS percentage.
+Because both the p-value and adjusted R-squared are weak, the coefficients don’t tell us much. The slope (0.12349) suggests a very small positive relationship — math scores go up slightly as FARMS percentage increases — but the effect is so small and so uncertain that it likely reflects noise rather than a real pattern.
+Overall, this model tells us that FARMS percentage is not a meaningful predictor of math scores in this dataset, and the relationship between the two variables appears weak, inconsistent, and not statistically significant.
 
 ### Task: Identifying Schools with Biggest Residuals (2 points)
 
@@ -83,10 +87,18 @@ schools <- schools |>
 ```
 The schools with the biggest positive residuals are performing better than expected, while the schools with the biggest negative residuals are performing worse than expected, based on their FARMS percentage. Look at the absolute values of the residuals; what are the largest differences between the predicted result and the actual math scores?
 
-ANSWER HERE
+**WRITE YOUR ANSWER HERE** 
+Some of the largest differences between the predicted result and actual math scores are WHITEMARSH EL SCH, GULPH ELEMENTARY SCH, and CROOKED BILLET EL SCH. They have abs residual scores around 34, 31, and 31. These are the 3 greatest schools with the largest differences. 
 
 ## Task: Evaluate the model (3 points)
 
 A school board member has said at a meeting that elementary schools with fewer students on free and reduced price meals do better on standardized math tests. Describe what conclusions you'd draw from this model's results and how it would influence a story pitch about the school board member and math scores.
 
-ANSWER HERE
+**WRITE YOUR ANSWER HERE**
+Based on this model, there’s no evidence supporting the board member’s claim that schools with fewer FARMS students perform better. The slope is slightly positive — math scores rise a bit as FARMS percentage increases but the effect is very small and not statistically significant (p = 0.123).
+
+The Adjusted R-squared is 0.025, meaning FARMS percentage explains only about 2.5% of the variation in math scores, so it’s not a meaningful predictor.
+
+For a story pitch, I’d note that the data does not support the board member’s statement. Instead, the angle could focus on why this assumption persists and what other factors actually explain differences in school performance, since poverty rates alone don’t tell the story.
+
+
