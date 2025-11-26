@@ -4,35 +4,145 @@ author: "Justin Corman"
 output: html_document
 date: "2025-11-12"
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ```{r}
 library(tidyverse)
+library(janitor)
+library(lubridate)
+library(ggplot2)
 ```
-
 ```{r}
-billboard <- read_csv("billboard_hot_number_ones_database.csv")
+# Load + clean data
+billboard <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQVR7XE8UGPh9EYKpSLzrNA0kXqcQo3AONREuc6mAAaHAu-8ia01STi_HrHgATfgJ5n9xUAUHPSl9ou/pub?gid=1077686609&single=true&output=csv") |> 
+  clean_names() |> 
+  mutate(date_new = dmy(date)) |> 
+  mutate(
+    date_new = if_else(year(date_new) > 2024, date_new - years(100), date_new),
+    year = year(date_new)
+  ) |> 
+  select(date_new, year, everything())
 ```
-
 ```{r}
+# Summary statistics
 music_stats <- billboard %>%
   summarise(
-    mean_bpm = mean(BPM, na.rm = TRUE),
-    sd_bpm = sd(BPM, na.rm = TRUE),
-    min_bpm = min(BPM, na.rm = TRUE),
-    max_bpm = max(BPM, na.rm = TRUE),
-    median_bpm = median(BPM, na.rm = TRUE)
+    mean_bpm = mean(bpm, na.rm = TRUE),
+    sd_bpm = sd(bpm, na.rm = TRUE),
+    min_bpm = min(bpm, na.rm = TRUE),
+    max_bpm = max(bpm, na.rm = TRUE),
+    median_bpm = median(bpm, na.rm = TRUE)
+  )
+
+music_stats
+
+# Create eras + decades
+billboard <- billboard %>%
+  mutate(
+    era = case_when(
+      year >= 1970 & year <= 1999 ~ "1970_1999",
+      year >= 2010                ~ "2010_2020s",
+      TRUE                        ~ "other"
+    ),
+    decade = case_when(
+      year >= 1970 & year <= 1979 ~ "1970s",
+      year >= 1980 & year <= 1989 ~ "1980s",
+      year >= 1990 & year <= 1999 ~ "1990s",
+      year >= 2010 & year <= 2019 ~ "2010s",
+      year >= 2020                ~ "2020s",
+      TRUE                        ~ NA_character_
+    )
   )
 ```
+```{r}
+# T-test prep
+bpm_eras <- billboard %>%
+  filter(era %in% c("1970_1999", "2010_2020s")) %>%
+  drop_na(bpm)
+
+bpm_summary_by_era <- bpm_eras %>%
+  group_by(era) %>%
+  summarise(
+    mean_bpm = mean(bpm),
+    sd_bpm   = sd(bpm),
+    n        = n(),
+    .groups  = "drop"
+  )
+
+bpm_1970_1999  <- bpm_eras %>% filter(era == "1970_1999")  %>% pull(bpm)
+bpm_2010_2020s <- bpm_eras %>% filter(era == "2010_2020s") %>% pull(bpm)
+
+# T-test (modern ≥ 10 BPM faster)
+t_bpm <- t.test(
+  bpm_2010_2020s,
+  bpm_1970_1999,
+  alternative = "greater",
+  mu = 10
+)
+
+t_bpm
+```
+```{r}
+# ANOVA across decades
+billboard_decades <- billboard %>%
+  filter(!is.na(decade), year >= 1970) %>%
+  drop_na(bpm)
+
+anova_model <- aov(bpm ~ decade, data = billboard_decades)
+summary(anova_model)
+
+tukey_bpm <- TukeyHSD(anova_model)
+tukey_bpm
+
+# Visualization
+ggplot(billboard_decades, aes(x = decade, y = bpm)) +
+  geom_boxplot(outlier.alpha = 0.4) +
+  geom_jitter(width = 0.15, alpha = 0.2) +
+  labs(
+    title = "BPM of Billboard Hot 100 #1 Songs by Decade",
+    x = "Decade",
+    y = "Beats Per Minute (BPM)"
+  ) +
+  theme_minimal()
+```
+
+
 Statistics for Music BPM
 mean:	115.8562
 SD: 24.55999 
 min:16
 max:206
 median:115
+
+
+PART 2: 
+I focused on whether modern #1 hits are meaningfully faster than older ones. I compared BPM values from two eras: 1970–1999 and 2010–2020s. My hypotheses were:
+
+UPDATED HYPOTHESIS'S:
+Ho: The average BPM of 2010–2020s #1 songs is at most 10 BPM higher than the average BPM from 1970–1999.
+
+H1: The average BPM of 2010–2020s #1 songs is more than 10 BPM higher than the 1970–1999 average.
+These hypotheses fit a one-sided two-sample t-test, which compares mean BPM across two independent time periods.
+
+T-TEST:
+
+The t-test compares whether modern #1 hits have increased in BPM by more than 10 BPM compared to older hits. The summary statistics show that recent songs have a higher mean BPM, but the t-test evaluates whether that difference is large enough to meet the 10-BPM threshold.
+
+If the p-value < 0.05, I reject the null hypothesis and conclude that modern #1 hits are significantly more than 10 BPM faster.
+
+If the p-value > 0.05, I fail to reject the null hypothesis, meaning the increase is not statistically greater than 10 BPM.
+After reviewing my output, the p-value was 0.9853, so I did not reject the null hypothesis.
+
+ANOVA TEST: 
+
+I also ran a one-way ANOVA to test whether BPM differs across decades (1970s–2020s). The ANOVA checks whether at least one decade has a significantly different mean tempo. A small p-value would indicate that tempo changes across decades are statistically meaningful. The Tukey test identifies which decades differ from one another.
+Based on my results, the ANOVA p-value was 0.0197, which means BPM values across decades do show statistically significant differences.
+
+BOXPLOT: 
+
+The boxplot of BPM by decade helps visualize how song tempo has shifted over time. Higher median lines for the 2010s or 2020s would visually support the idea that modern hits tend to be faster. The overlap and spread also show that while the overall trend changes, there is still wide variation in tempo within each decade.
+
+
+
+PART 1: 
 
 --What does it contain and what time period does it cover?
 
