@@ -1,0 +1,178 @@
+---
+title: "final project"
+author: "Justin Corman" 
+output: html_document
+date: "2025-11-12"
+---
+```{r}
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(ggplot2)
+```
+
+```{r}
+# Load + clean data
+billboard <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQVR7XE8UGPh9EYKpSLzrNA0kXqcQo3AONREuc6mAAaHAu-8ia01STi_HrHgATfgJ5n9xUAUHPSl9ou/pub?gid=1077686609&single=true&output=csv") |> 
+  clean_names() |> 
+  mutate(date_new = dmy(date)) |> 
+  mutate(
+    date_new = if_else(year(date_new) > 2024, date_new - years(100), date_new),
+    year = year(date_new)
+  ) |> 
+  select(date_new, year, everything())
+```
+Loaded the billboard dataset so the rest of my code can calculate data using various different tests and plots. 
+
+```{r}
+# Summary statistics
+music_stats <- billboard %>%
+  summarise(
+    mean_bpm = mean(bpm, na.rm = TRUE),
+    sd_bpm = sd(bpm, na.rm = TRUE),
+    min_bpm = min(bpm, na.rm = TRUE),
+    max_bpm = max(bpm, na.rm = TRUE),
+    median_bpm = median(bpm, na.rm = TRUE)
+  )
+
+music_stats
+
+# Create eras + decades
+billboard <- billboard %>%
+  mutate(
+    era = case_when(
+      year >= 1970 & year <= 1999 ~ "1970_1999",
+      year >= 2010                ~ "2010_2020s",
+      TRUE                        ~ "other"
+    ),
+    decade = case_when(
+      year >= 1970 & year <= 1979 ~ "1970s",
+      year >= 1980 & year <= 1989 ~ "1980s",
+      year >= 1990 & year <= 1999 ~ "1990s",
+      year >= 2010 & year <= 2019 ~ "2010s",
+      year >= 2020                ~ "2020s",
+      TRUE                        ~ NA_character_
+    )
+  )
+```
+Statistics for Music BPM
+mean:	115.8562 (average of 115.8562 BPM for each song)
+SD: 24.55999 (has an average distance of 24.55999 away from the mean for each song)
+min:16 (the lowest BPM is 16)
+max:206 (the highest BPM is 206)
+median:115 (The middle point of the BPM is 115) 
+
+```{r}
+# T-test prep
+bpm_eras <- billboard %>%
+  filter(era %in% c("1970_1999", "2010_2020s")) %>%
+  drop_na(bpm)
+
+bpm_summary_by_era <- bpm_eras %>%
+  group_by(era) %>%
+  summarise(
+    mean_bpm = mean(bpm),
+    sd_bpm   = sd(bpm),
+    n        = n(),
+    .groups  = "drop"
+  )
+
+bpm_1970_1999  <- bpm_eras %>% filter(era == "1970_1999")  %>% pull(bpm)
+bpm_2010_2020s <- bpm_eras %>% filter(era == "2010_2020s") %>% pull(bpm)
+
+# T-test (modern ≥ 10 BPM faster)
+t_bpm <- t.test(
+  bpm_2010_2020s,
+  bpm_1970_1999,
+  alternative = "greater",
+  mu = 10
+)
+
+t_bpm
+```
+T-TEST:
+
+The t-test compares whether modern #1 hits have increased in BPM by more than 10 BPM compared to older hits. The summary statistics show that recent songs have a higher mean BPM, but the t-test evaluates whether that difference is large enough to meet the 10-BPM threshold.
+
+If the p-value < 0.05, I reject the null hypothesis and conclude that modern #1 hits are significantly more than 10 BPM faster.
+
+If the p-value > 0.05, I fail to reject the null hypothesis, meaning the increase is not statistically greater than 10 BPM.
+
+After reviewing my output, the p-value was 0.9853, so I did not reject the null hypothesis.
+
+```{r}
+# ANOVA across decades
+billboard_decades <- billboard %>%
+  filter(!is.na(decade), year >= 1970) %>%
+  drop_na(bpm)
+
+anova_model <- aov(bpm ~ decade, data = billboard_decades)
+summary(anova_model)
+
+tukey_bpm <- TukeyHSD(anova_model)
+tukey_bpm
+
+```
+ANOVA TEST: 
+
+I also ran a one-way ANOVA to test whether BPM differs across decades (1970s–2020s). The ANOVA checks whether at least one decade has a significantly different mean tempo. A small p-value would indicate that tempo changes across decades are statistically meaningful. The Tukey test identifies which decades differ from one another.
+
+Based on my results, the ANOVA p-value was 0.0197, which means BPM values across decades do show statistically significant differences.
+
+
+```{r}
+# Visualization
+ggplot(billboard_decades, aes(x = decade, y = bpm)) +
+  geom_boxplot(outlier.alpha = 0.4) +
+  geom_jitter(width = 0.15, alpha = 0.2) +
+  labs(
+    title = "BPM of Billboard Hot 100 #1 Songs by Decade",
+    x = "Decade",
+    y = "Beats Per Minute (BPM)"
+  ) +
+  theme_minimal()
+```
+BOXPLOT: 
+The boxplot of BPM by decade helps visualize how song tempo has shifted over time. Higher median lines for the 2010s or 2020s would visually support the idea that modern hits tend to be faster. The overlap and spread also show that while the overall trend changes, there is still wide variation in tempo within each decade.
+
+
+
+HYPOTHESIS:
+Ho: The average BPM of 2010–2020s #1 songs is at most 10 BPM higher than the average BPM from 1970–1999.
+
+H1: The average BPM of 2010–2020s #1 songs is more than 10 BPM higher than the 1970–1999 average.
+These hypotheses fit a one-sided two-sample t-test, which compares mean BPM across two independent time periods.
+
+Interpretation:
+I tested whether modern Billboard #1 songs from 2010 to the 2020s are more than 10 BPM faster on average than songs from 1970 to 1999. This comparison uses a one-sided two-sample t-test because it evaluates whether the newer era exceeds the older era by a specific amount rather than simply checking for any difference. The sample means showed that recent songs averaged about 119.90 BPM while songs from 1970 to 1999 averaged about 114.64 BPM. Although this difference is in the expected direction, the statistical test evaluates whether the increase is large enough to exceed the 10 BPM threshold stated in the hypothesis.
+The test produced a p-value of 0.9853, which provides no evidence that the modern era is more than 10 BPM faster. Because the p-value is far greater than the typical 0.05 significance level, I did not reject the null hypothesis. The data suggest that recent #1 hits may be slightly faster on average, but the increase is not large enough to support the claim that they exceed older songs by more than 10 BPM.
+
+
+
+
+STORY PITCH: How the Tempo of Popular Music Has Changed Over Time
+
+My analysis examined whether today’s Billboard Hot 100 number one songs are significantly faster than hits from the late twentieth century. Although the average BPM for songs in the 2010s and 2020s was slightly higher than the average for songs from 1970 to 1999, the increase was not large enough to support the claim that modern hits are more than 10 BPM faster. The t-test produced a p-value of 0.9853, which indicates that the tempo difference does not reach the threshold outlined in the hypothesis. A broader comparison across decades using ANOVA did reveal significant differences overall, and the 2020s stand out as somewhat faster than earlier decades, especially the 1990s. Even so, tempo varies widely within every decade, and the trend is far less dramatic than common assumptions about “songs getting faster.” 
+
+There are several issues to consider when interpreting these results. Tempo alone does not capture larger shifts in musical style, production, or cultural trends. Some decades contain relatively few number one hits, which affects stability in the averages. Genre dominance also changes over time, and a few unusually fast or slow songs can influence decade-level means. The dataset relies on the Billboard charts, which reflect commercial popularity rather than the full spectrum of music being produced.
+
+To strengthen this story, I would interview music producers and chart analysts to understand how songwriting conventions have evolved over the last fifty years. I would also gather data on other musical features such as duration, energy score, danceability, and key changes to provide a fuller picture of how hit songs have shifted. Finally, I would speak with cultural critics about why audiences might perceive modern music as “faster,” even when the numbers tell a more nuanced story.
+
+This pitch would lead to a data-driven feature that challenges a widely held assumption, shows how musical trends unfold over time, and brings in expert voices to explain why our perception of popular music does not always match the measurable patterns.
+
+
+
+
+--What does it contain and what time period does it cover?
+
+I focused on whether modern #1 hits are meaningfully faster than older ones. I compared BPM values from two eras: 1970–1999 and 2010–2020s. 
+
+ANSWER HERE: The Billboard Hot 100 Number Ones dataset contains detailed information about every song that has reached the #1 position on the Billboard Hot 100 chart. Each row represents a unique chart-topping song and includes variables such as the title, artist, release year, and BPM just to name a few. The dataset covers hit songs from 1958 through the early 2020s, providing more than sixty years of musical trends and allowing for a comprehensive look at how #1 hits have evolved over time.
+
+--Which columns will be most important for your analysis?
+
+ANSWER HERE:The columns that will matter most for my analysis are those that directly describe the musical qualities of each song, because they help reveal patterns in what makes a song successful. In particular, BPM, Energy, and Danceability are likely to be the key variables, as each one captures an aspect of a song’s sound or structure. The Year column is also important since it allows for comparisons across decades.
+
+--What's missing that you might need or want?
+
+ANSWER HERE: Several valuable pieces of information are missing from the dataset that could help explain why certain songs make it to #1. For example, there is no data on streaming counts, radio airplay, or even TikTok engagement that could show why some are heavily influenced on the modern chart performances. Having these variables would make it easier to understand the cultural forces behind a hit, but they are not included in the dataset, so the analysis must rely only on musical and structural characteristics.
